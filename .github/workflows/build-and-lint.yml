@@ -1,0 +1,49 @@
+name: PR Quality Check
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-build:
+    runs-on: ubuntu-latest
+    name: Lint and Build Check
+    
+    env:
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run lint check
+        run: |
+          echo "🔍 Running ESLint..."
+          npm run lint
+          echo "✅ Lint check passed!"
+        
+      - name: Run build check
+        run: |
+          echo "🏗️ Building application..."
+          npm run build
+          echo "✅ Build completed successfully"
+        
+      - name: Verify build artifacts
+        run: |
+          if [ -d ".next" ]; then
+            echo "✅ Build verification passed - .next directory exists"
+            echo "📦 Build artifacts created successfully"
+          else
+            echo "❌ Build verification failed - .next directory not found"
+            exit 1
+          fi 
