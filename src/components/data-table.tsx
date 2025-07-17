@@ -580,42 +580,73 @@ export function DataTable<T extends { id?: string | number }>({
     </Card>
   );
 
-  const paginationSection = pagination?.enabled && pagination.totalCount && pagination.totalCount > (pagination.pageSize || 10) && (
-    <div className="mt-6">
-      <Pagination>
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious
-              onClick={() => pagination.onPageChange?.(Math.max(1, (pagination.currentPage || 1) - 1))}
-              className={(pagination.currentPage || 1) === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-            />
-          </PaginationItem>
-          
-          {Array.from({ length: Math.ceil(pagination.totalCount / (pagination.pageSize || 10)) }, (_, i) => i + 1).map((page) => (
-            <PaginationItem key={page}>
-              <PaginationLink
-                onClick={() => pagination.onPageChange?.(page)}
-                isActive={(pagination.currentPage || 1) === page}
-                className="cursor-pointer"
-              >
-                {page}
-              </PaginationLink>
+  const paginationSection =
+    pagination?.enabled &&
+    pagination.totalCount &&
+    pagination.totalCount > (pagination.pageSize || 10) &&
+    !loading &&
+    paginatedData.length > 0 ? (
+      <div className="mt-6">
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={() =>
+                  pagination.onPageChange?.(
+                    Math.max(1, (pagination.currentPage || 1) - 1)
+                  )
+                }
+                className={
+                  (pagination.currentPage || 1) === 1
+                    ? "pointer-events-none opacity-50"
+                    : "cursor-pointer"
+                }
+              />
             </PaginationItem>
-          ))}
-          
-          <PaginationItem>
-            <PaginationNext
-              onClick={() => {
-                const totalPages = Math.ceil((pagination.totalCount || 0) / (pagination.pageSize || 10));
-                pagination.onPageChange?.(Math.min(totalPages, (pagination.currentPage || 1) + 1));
-              }}
-              className={(pagination.currentPage || 1) === Math.ceil((pagination.totalCount || 0) / (pagination.pageSize || 10)) ? "pointer-events-none opacity-50" : "cursor-pointer"}
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
-    </div>
-  );
+
+            {Array.from(
+              {
+                length: Math.ceil(
+                  pagination.totalCount / (pagination.pageSize || 10)
+                ),
+              },
+              (_, i) => i + 1
+            ).map((page) => (
+              <PaginationItem key={page}>
+                <PaginationLink
+                  onClick={() => pagination.onPageChange?.(page)}
+                  isActive={(pagination.currentPage || 1) === page}
+                  className="cursor-pointer"
+                >
+                  {page}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+
+            <PaginationItem>
+              <PaginationNext
+                onClick={() => {
+                  const totalPages = Math.ceil(
+                    (pagination.totalCount || 0) / (pagination.pageSize || 10)
+                  );
+                  pagination.onPageChange?.(
+                    Math.min(totalPages, (pagination.currentPage || 1) + 1)
+                  );
+                }}
+                className={
+                  (pagination.currentPage || 1) ===
+                  Math.ceil(
+                    (pagination.totalCount || 0) / (pagination.pageSize || 10)
+                  )
+                    ? "pointer-events-none opacity-50"
+                    : "cursor-pointer"
+                }
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
+  ) : null;
 
   const content = (
     <>
@@ -767,4 +798,4 @@ export const getThemeBadge = (text: string, theme: "default" | "primary" | "seco
       {text}
     </Badge>
   );
-}; 
+};
