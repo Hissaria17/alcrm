@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Twitter, Linkedin, Github, Mail } from 'lucide-react';
+import {  Linkedin, Mail } from 'lucide-react';
 
 
 export default function Footer() {
@@ -26,18 +26,14 @@ export default function Footer() {
               Empowering professionals to find their dream careers through job opportunities, mentorship, and comprehensive career resources.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <Twitter className="w-5 h-5" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <Linkedin className="w-5 h-5" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <Github className="w-5 h-5" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <Mail className="w-5 h-5" />
-              </a>
+          
+                              <a href="https://www.linkedin.com/in/sachin-hissaria/" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
+                  <Linkedin className="w-5 h-5" />
+                </a>
+         
+                              <a href="mailto:CISAwithSachin@gmail.com" className="text-gray-400 hover:text-white transition-colors">
+                  <Mail className="w-5 h-5" />
+                </a>
             </div>
           </div>
 
@@ -45,11 +41,11 @@ export default function Footer() {
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Job Seekers</h3>
             <ul className="space-y-2">
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Browse Jobs</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Resume Review</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Interview Prep</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Career Coaching</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Skill Assessment</a></li>
+              <li><Link href="/signin" className="text-gray-400 hover:text-white transition-colors">Browse Jobs</Link></li>
+              <li><Link href="/signin" className="text-gray-400 hover:text-white transition-colors">Resume Review</Link></li>
+              <li><Link href="/signin" className="text-gray-400 hover:text-white transition-colors">Interview Prep</Link></li>
+              <li><Link href="/signin" className="text-gray-400 hover:text-white transition-colors">Career Coaching</Link></li>
+              <li><Link href="/signin" className="text-gray-400 hover:text-white transition-colors">Skill Assessment</Link></li>
             </ul>
           </div>
 
@@ -57,11 +53,9 @@ export default function Footer() {
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Companies</h3>
             <ul className="space-y-2">
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Post Jobs</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Find Talent</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Employer Branding</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Pricing</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Success Stories</a></li>
+              <li><Link href="/signin" className="text-gray-400 hover:text-white transition-colors">Post Jobs</Link></li>
+              <li><Link href="/signin" className="text-gray-400 hover:text-white transition-colors">Find Talent</Link></li>
+              <li><Link href="#" className="text-gray-400 hover:text-white transition-colors">Success Stories</Link></li>
             </ul>
           </div>
 
@@ -69,8 +63,7 @@ export default function Footer() {
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Support</h3>
             <ul className="space-y-2">
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Help Center</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Contact Us</a></li>
+              <li><Link href="/signin" className="text-gray-400 hover:text-white transition-colors">Contact Us</Link></li>
               <li>
                 <Link 
                   href="/about"
@@ -79,8 +72,7 @@ export default function Footer() {
                   About Us
                 </Link>
               </li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Blog</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Careers</a></li>
+              <li><Link href="/signin" className="text-gray-400 hover:text-white transition-colors">Careers</Link></li>
             </ul>
           </div>
         </div>
