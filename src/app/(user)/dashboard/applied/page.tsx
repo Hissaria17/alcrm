@@ -61,14 +61,15 @@ export default function ApplicationsPage() {
           applicationsData.map(async (app) => {
             const { data: jobData } = await supabase
               .from('jobs')
-              .select('title, location')
+              .select('title, location, salary_range')
               .eq('job_id', app.job_id)
               .single();
             
             return {
               ...app,
               jobTitle: jobData?.title || 'Unknown Position',
-              jobLocation: jobData?.location || 'Not specified'
+              jobLocation: jobData?.location || 'Not specified',
+              jobSalary: jobData?.salary_range || 'Not specified'
             };
           })
         );
@@ -85,6 +86,7 @@ export default function ApplicationsPage() {
             status: app.status,
             experience: 'Not specified',
             location: app.jobLocation,
+            salary: app.jobSalary,
             resume: app.resume_url_at_application || 'No resume provided',
             coverLetter: app.cover_letter || 'No cover letter provided',
             candidate_id: app.candidate_id,
@@ -143,6 +145,11 @@ export default function ApplicationsPage() {
     }
   };
 
+  // Handle row click to navigate to job details
+  const handleRowClick = (application: UserApplication) => {
+    window.location.href = `/dashboard/jobs/${application.job_id}`;
+  };
+
   // DataTable columns configuration
   const columns: DataColumn<UserApplication>[] = [
     {
@@ -165,6 +172,16 @@ export default function ApplicationsPage() {
         <div className="flex items-center gap-2">
           <MapPin className="h-4 w-4 text-gray-400" />
           <span>{application.location}</span>
+        </div>
+      ),
+      sortable: true,
+    },
+    {
+      key: "salary",
+      header: "Salary",
+      render: (application) => (
+        <div>
+          <span>{application.salary || 'Not specified'}</span>
         </div>
       ),
       sortable: true,
@@ -308,6 +325,7 @@ export default function ApplicationsPage() {
         }}
         loading={loading}
         onRefresh={loadApplications}
+        onRowClick={handleRowClick}
         showRowNumbers={false}
         striped={true}
         hoverable={true}
@@ -339,6 +357,10 @@ export default function ApplicationsPage() {
                   <div>
                     <label className="text-sm font-medium text-gray-500">Location</label>
                     <p className="text-gray-900">{selectedApplication.location}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Salary</label>
+                    <p className="text-gray-900">{selectedApplication.salary || 'Not specified'}</p>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-500">Applied Date</label>

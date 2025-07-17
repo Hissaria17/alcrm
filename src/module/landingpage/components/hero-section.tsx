@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Play, Briefcase, Users, TrendingUp, Star } from 'lucide-react';
+import Link from 'next/link';
 
 export default function HeroSection() {
   return (
@@ -27,14 +28,18 @@ export default function HeroSection() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white group">
-                Get Started Free
-                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
-              <Button size="lg" variant="outline" className="group">
-                <Play className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
-                Watch Demo
-              </Button>
+              <Link href="/signin">
+                <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white group">
+                  Get Started Free
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+              <Link href="/about">
+                <Button size="lg" variant="outline" className="group">
+                  <Play className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
+                  About Us
+                </Button>
+              </Link>
             </div>
 
             <div className="flex items-center space-x-8 pt-4">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
@@ -28,7 +29,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
-import { ExternalLink, Search, Loader2, Calendar, BookOpen } from "lucide-react";
+import {  Search, Loader2, Calendar, BookOpen, FileText } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { FreeResource, RawFreeResourceData } from "@/types/job";
@@ -38,6 +39,7 @@ import { FreeResourcesSkeleton } from '@/components/skeletons/user/free-resource
 const ITEMS_PER_PAGE = 9;
 
 export default function FreeResourcesPage() {
+  const router = useRouter();
   const [resources, setResources] = useState<FreeResource[]>([]);
   const [selectedResource, setSelectedResource] = useState<FreeResource | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
@@ -55,7 +57,8 @@ export default function FreeResourcesPage() {
       const { data: typesData, error } = await supabase
         .from('free_resources')
         .select('resource_type')
-        .not('resource_type', 'is', null);
+        .not('resource_type', 'is', null)
+        .eq('is_deleted', false);
 
       if (error) {
         return;
@@ -83,8 +86,12 @@ export default function FreeResourcesPage() {
           resource_url,
           resource_type,
           created_at,
-          created_by
-        `, { count: 'exact' });
+          created_by,
+          updated_at,
+          is_deleted,
+          resource_link
+        `, { count: 'exact' })
+        .eq('is_deleted', false);
 
       // Apply filters
       if (searchTerm) {
@@ -112,6 +119,9 @@ export default function FreeResourcesPage() {
           resource_type: resource.resource_type,
           created_at: resource.created_at,
           created_by: resource.created_by,
+          updated_at: resource.updated_at,
+          is_deleted: resource.is_deleted,
+          resource_link: resource.resource_link,
         }));
         
         setResources(transformedResources);
@@ -163,6 +173,8 @@ export default function FreeResourcesPage() {
         return <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100">Workshop</Badge>;
       case "webinar":
         return <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100">Webinar</Badge>;
+      case "pdf":
+        return <Badge className="bg-red-100 text-red-800 hover:bg-red-100">PDF</Badge>;
       default:
         return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">{type?.charAt(0)?.toUpperCase() + type?.slice(1) || 'Unknown'}</Badge>;
     }
@@ -181,8 +193,17 @@ export default function FreeResourcesPage() {
     setIsDetailOpen(true);
   };
 
-  const handleOpenResource = (url: string) => {
-    window.open(url, '_blank');
+
+
+  const handleViewPDF = (resource: FreeResource) => {
+    router.push(`/dashboard/free-resources/${resource.resource_id}`);
+  };
+
+  const isPDFResource = (resource: FreeResource) => {
+    const url = resource.resource_link || resource.resource_url;
+    return resource.resource_type.toLowerCase() === 'pdf' || 
+           url.toLowerCase().endsWith('.pdf') || 
+           url.toLowerCase().includes('pdf');
   };
 
   // Add this function to get a color class based on resource type
@@ -210,6 +231,8 @@ export default function FreeResourcesPage() {
         return "bg-gradient-to-br from-amber-100 to-amber-50 border-amber-200";
       case "webinar":
         return "bg-gradient-to-br from-emerald-100 to-emerald-50 border-emerald-200";
+      case "pdf":
+        return "bg-gradient-to-br from-red-100 to-red-50 border-red-200";
       default:
         return "bg-gradient-to-br from-gray-100 to-gray-50 border-gray-200";
     }
@@ -286,15 +309,19 @@ export default function FreeResourcesPage() {
                           <Calendar className="h-4 w-4" />
                           {formatDate(resource.created_at)}
                         </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="ml-auto"
-                          onClick={e => { e.stopPropagation(); handleOpenResource(resource.resource_url); }}
-                        >
-                          <ExternalLink className="h-4 w-4 mr-1" />
-                          Open
-                        </Button>
+                        <div className="flex gap-2">
+                          {isPDFResource(resource) && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={e => { e.stopPropagation(); handleViewPDF(resource); }}
+                              className="flex items-center gap-1"
+                            >
+                              <FileText className="h-4 w-4" />
+                              View PDF
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -353,31 +380,43 @@ export default function FreeResourcesPage() {
           </DialogHeader>
           {selectedResource && (
             <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <BookOpen className="h-4 w-4 text-gray-400" />
-                    <span className="font-medium">Resource Type</span>
-                  </div>
-                  <div>{getTypeBadge(selectedResource.resource_type)}</div>
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-2">Description</h4>
+                  <p className="text-gray-600">{selectedResource.description}</p>
                 </div>
                 
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleViewDetails(selectedResource)}
-                    className="flex-1"
-                  >
-                    View Details
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleOpenResource(selectedResource.resource_url)}
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <BookOpen className="h-4 w-4 text-gray-400" />
+                      <span className="font-medium">Resource Type</span>
+                    </div>
+                    <div>{getTypeBadge(selectedResource.resource_type)}</div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-gray-400" />
+                      <span className="font-medium">Added</span>
+                    </div>
+                    <div className="text-gray-600">{formatDate(selectedResource.created_at)}</div>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  {isPDFResource(selectedResource) && (
+                    <Button
+                      onClick={() => {
+                        setIsDetailOpen(false);
+                        handleViewPDF(selectedResource);
+                      }}
+                      className="flex items-center gap-2"
+                    >
+                      <FileText className="h-4 w-4" />
+                      View PDF
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>

@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
+import { useClientRouteGuard } from "@/hooks/useClientRouteGuard";
+import { useAuth } from "@/hooks/useAuth";
 import { DashboardHeader } from "@/module/admin/components/dashboard/dashboard-header";
 import { DashboardSidebar } from "@/module/admin/components/dashboard/dashboard-sidebar";
 import { Button } from "@/components/ui/button";
@@ -59,6 +62,13 @@ interface PasswordData {
 }
 
 export default function ProfilePage() {
+  // Auth checks
+  const { loading: authLoading, isAuthenticated } = useAuthGuard();
+  const { isAdmin, requireRole } = useAuth();
+  
+  // Client-side route protection
+  useClientRouteGuard();
+
   const user = useUser();
   const { userProfile, loading: profileLoading } = useUserProfile();
   const [isEditing, setIsEditing] = useState(false);
@@ -84,9 +94,16 @@ export default function ProfilePage() {
     confirmPassword: "",
   });
 
+  // Verify admin role access
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      requireRole(['ADMIN']);
+    }
+  }, [authLoading, isAuthenticated, requireRole]);
+
   // Load user profile data when component mounts or userProfile changes
   useEffect(() => {
-    if (userProfile && user) {
+    if (userProfile && user && isAdmin) {
       setProfileData({
         first_name: userProfile.first_name || "",
         last_name: userProfile.last_name || "",
@@ -96,7 +113,7 @@ export default function ProfilePage() {
         role: userProfile.role || "",
       });
     }
-  }, [userProfile, user]);
+  }, [userProfile, user, isAdmin]);
 
   const handleInputChange = (field: keyof ProfileData, value: string) => {
     setProfileData(prev => ({
@@ -286,7 +303,8 @@ export default function ProfilePage() {
     }
   };
 
-  if (profileLoading) {
+  // Show loading state while checking authentication
+  if (authLoading || profileLoading) {
     return (
       <div className="flex h-screen bg-gray-50">
         <DashboardSidebar />
@@ -302,6 +320,11 @@ export default function ProfilePage() {
         </div>
       </div>
     );
+  }
+
+  // Don't render anything if not authenticated or not admin (redirect will happen)
+  if (!isAuthenticated || !isAdmin) {
+    return null;
   }
 
   return (

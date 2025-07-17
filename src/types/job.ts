@@ -50,6 +50,7 @@ export interface DatabaseJob {
   job_type: JobType;
   location: string;
   status: JobStatus;
+  salary_range?: string;
   created_at: string;
   companies: {
     name: string;
@@ -63,6 +64,7 @@ export interface DatabaseJobWithCompanyId {
   job_type: JobType;
   location: string;
   status: JobStatus;
+  salary_range?: string;
   created_at: string;
   company_id?: string;
   companies: {
@@ -188,6 +190,7 @@ export interface UserJobListing {
   job_type: JobType;
   location: string;
   status: JobStatus;
+  salary_range?: string;
   created_at: string;
   companies: {
     name: string;
@@ -202,6 +205,7 @@ export interface JobDetail {
   job_type: JobType;
   location: string;
   status: JobStatus;
+  salary_range?: string;
   created_at: string;
   company: {
     company_id: string;
@@ -297,6 +301,7 @@ export interface UserApplication {
   status: ApplicationStatus;
   experience: string;
   location: string;
+  salary?: string;
   resume: string;
   coverLetter: string;
   candidate_id: string;
@@ -325,6 +330,7 @@ export interface RawJobData {
   job_type: JobType;
   location: string;
   status: JobStatus;
+  salary_range?: string;
   created_at: string;
   company_id?: string;
   companies: {
@@ -341,6 +347,9 @@ export interface FreeResource {
   resource_type: string;
   created_at: string;
   created_by: string | null;
+  updated_at: string | null;
+  is_deleted: boolean | null;
+  resource_link: string | null;
 }
 
 export interface RawFreeResourceData {
@@ -351,4 +360,7 @@ export interface RawFreeResourceData {
   resource_type: string;
   created_at: string;
   created_by: string | null;
+  updated_at: string | null;
+  is_deleted: boolean | null;
+  resource_link: string | null;
 } 

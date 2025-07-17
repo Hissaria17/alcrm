@@ -111,6 +111,11 @@ export default function ApplicationsPage() {
     loadJobs();
   };
 
+  // Handle row click to navigate to job details
+  const handleRowClick = (job: JobWithApplications) => {
+    router.push(`/admin/dashboard/applications/${job.job_id}`);
+  };
+
   const columns: DataColumn<JobWithApplications>[] = [
     {
       key: "title",
@@ -218,6 +223,7 @@ export default function ApplicationsPage() {
                 }}
                 loading={loading}
                 onRefresh={handleRefresh}
+                onRowClick={handleRowClick}
                 striped={true}
                 hoverable={true}
                 bordered={true}

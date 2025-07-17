@@ -66,6 +66,7 @@ export default function AdminJobDetailPage() {
     job_type: "" as JobDetail["job_type"],
     location: "",
     status: "" as JobDetail["status"],
+    salary: "",
   });
 
   const jobId = params.id as string;
@@ -82,6 +83,7 @@ export default function AdminJobDetailPage() {
           job_type,
           location,
           status,
+          salary_range,
           created_at,
           company_id,
           companies (
@@ -166,6 +168,7 @@ export default function AdminJobDetailPage() {
           job_type: jobData.job_type,
           location: jobData.location,
           status: jobData.status,
+          salary_range: jobData.salary_range,
           created_at: jobData.created_at,
           company: company
         });
@@ -318,6 +321,7 @@ export default function AdminJobDetailPage() {
         job_type: job.job_type,
         location: job.location,
         status: job.status,
+        salary: job.salary_range || "",
       });
       setIsEditOpen(true);
     }
@@ -352,7 +356,8 @@ export default function AdminJobDetailPage() {
           description: formData.description,
           job_type: formData.job_type,
           location: formData.location,
-          status: formData.status
+          status: formData.status,
+          salary_range: formData.salary
         })
         .eq('job_id', jobId);
 
@@ -441,6 +446,12 @@ export default function AdminJobDetailPage() {
                         <MapPin className="h-4 w-4 text-gray-400" />
                         <span>{job.location}</span>
                       </div>
+                      {job.salary_range && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-green-600 font-medium">₹</span>
+                          <span>{job.salary_range}</span>
+                        </div>
+                      )}
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-gray-400" />
                         <span>Posted {formatDate(job.created_at)}</span>
@@ -634,6 +645,17 @@ export default function AdminJobDetailPage() {
                 value={formData.location}
                 onChange={handleInputChange}
                 required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-salary">Salary Range</Label>
+              <Input
+                id="edit-salary"
+                name="salary"
+                placeholder="e.g. ₹8,00,000 - ₹12,00,000"
+                value={formData.salary}
+                onChange={handleInputChange}
               />
             </div>
 

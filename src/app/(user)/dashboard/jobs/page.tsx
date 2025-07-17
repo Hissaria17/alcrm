@@ -5,7 +5,7 @@ import { DataTable, DataColumn, getStatusBadge, getTypeBadge, formatDate } from 
 import { MapPin, Calendar, Briefcase, Search } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
-import { UserJobListing, JobPosting } from "@/types/job";
+import { UserJobListing, JobPosting, ApplicationStatus } from "@/types/job";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -17,17 +17,50 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { JobsSkeleton } from '@/components/skeletons/user/jobs-skeleton';
+import { truncateToWords } from "@/utils/text";
+import { useAuthStore } from "@/store/useAuthStore";
+import { Badge } from "@/components/ui/badge";
 
 const ITEMS_PER_PAGE = 10;
 
+// Extended JobPosting interface to include application status
+interface JobPostingWithApplication extends JobPosting {
+  applicationStatus?: ApplicationStatus;
+}
+
 export default function JobsPage() {
-  const [jobPostings, setJobPostings] = useState<JobPosting[]>([]);
+  const { user } = useAuthStore();
+  const [jobPostings, setJobPostings] = useState<JobPostingWithApplication[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
+
+  // Check application status for a job
+  const checkApplicationStatus = useCallback(async (jobId: string): Promise<ApplicationStatus | null> => {
+    if (!user?.id) return null;
+    
+    try {
+      const { data: application, error } = await supabase
+        .from('jobapplications')
+        .select('status')
+        .eq('job_id', jobId)
+        .eq('candidate_id', user.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 is "not found" error
+        console.error('Error checking application status:', error);
+        return null;
+      }
+
+      return application?.status || null;
+    } catch (error) {
+      console.error('Error checking application status:', error);
+      return null;
+    }
+  }, [user?.id]);
 
   const loadJobPostings = useCallback(async () => {
     setLoading(true);
@@ -41,6 +74,7 @@ export default function JobsPage() {
           job_type,
           location,
           status,
+          salary_range,
           created_at,
           companies (
             name,
@@ -82,16 +116,21 @@ export default function JobsPage() {
         setJobPostings([]);
         setTotalCount(0);
       } else if (jobs) {
-        // Transform the data to match our JobPosting interface
-        const transformedJobs: JobPosting[] = jobs.map((job: UserJobListing) => ({
-          id: job.job_id,
-          title: job.title,
-          location: job.location || 'Not specified',
-          type: job.job_type,
-          salary: 'Not specified',
-          postedDate: new Date(job.created_at).toISOString().split('T')[0],
-          status: job.status,
-          description: job.description
+        // Transform the data to match our JobPosting interface and check application status
+        const transformedJobs: JobPostingWithApplication[] = await Promise.all(jobs.map(async (job: UserJobListing) => {
+          const applicationStatus = await checkApplicationStatus(job.job_id);
+          
+          return {
+            id: job.job_id,
+            title: job.title,
+            location: job.location || 'Not specified',
+            type: job.job_type,
+            salary: job.salary_range || 'Not specified',
+            postedDate: new Date(job.created_at).toISOString().split('T')[0],
+            status: job.status,
+            description: job.description,
+            applicationStatus: applicationStatus || undefined
+          };
         }));
         
         setJobPostings(transformedJobs);
@@ -105,22 +144,48 @@ export default function JobsPage() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, searchTerm, statusFilter, typeFilter]);
+  }, [currentPage, searchTerm, statusFilter, typeFilter, checkApplicationStatus]);
 
   useEffect(() => {
     loadJobPostings();
   }, [loadJobPostings]);
 
+  // Function to get application status badge
+  const getApplicationStatusBadge = (status: ApplicationStatus | undefined) => {
+    if (!status) return null;
+    
+    switch (status) {
+      case "APPLIED":
+        return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">Applied</Badge>;
+      case "SHARED_WITH_COMPANY":
+        return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Shared</Badge>;
+      case "SHORTLISTED":
+        return <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-100">Shortlisted</Badge>;
+      case "REJECTED":
+        return <Badge className="bg-red-100 text-red-800 hover:bg-red-100">Rejected</Badge>;
+      case "INTERVIEW_SCHEDULED":
+        return <Badge className="bg-indigo-100 text-indigo-800 hover:bg-indigo-100">Interview</Badge>;
+      case "INTERVIEW_COMPLETED":
+        return <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-100">Completed</Badge>;
+      case "SELECTED":
+        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Selected</Badge>;
+      case "WITHDRAWN":
+        return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">Withdrawn</Badge>;
+      default:
+        return <Badge variant="secondary">{status}</Badge>;
+    }
+  };
+
   // Define columns for the DataTable
-  const columns: DataColumn<JobPosting>[] = [
+  const columns: DataColumn<JobPostingWithApplication>[] = [
     {
       key: "title",
       header: "Position",
       render: (job) => (
         <div>
-          <div className="font-semibold">{job.title}</div>
+          <div className="font-semibold">{truncateToWords(job.title, 3)}</div>
           <div className="text-sm text-gray-500 line-clamp-2">
-            {job.description.substring(0, 100)}...
+            {truncateToWords(job.description, 3)}
           </div>
         </div>
       ),
@@ -138,9 +203,25 @@ export default function JobsPage() {
       sortable: false,
     },
     {
+      key: "salary",
+      header: "Salary",
+      render: (job) => (
+        <div>
+          <span>{job.salary}</span>
+        </div>
+      ),
+      sortable: false,
+    },
+    {
       key: "type",
       header: "Type",
       render: (job) => getTypeBadge(job.type),
+      sortable: false,
+    },
+    {
+      key: "applicationStatus",
+      header: "Application",
+      render: (job) => getApplicationStatusBadge(job.applicationStatus),
       sortable: false,
     },
     {
@@ -167,8 +248,13 @@ export default function JobsPage() {
     setCurrentPage(page);
   };
 
+  // Handle row click to navigate to job details
+  const handleRowClick = (job: JobPostingWithApplication) => {
+    window.location.href = `/dashboard/jobs/${job.id}`;
+  };
+
   // Handle view details action
-  const handleViewDetails = (job: JobPosting) => {
+  const handleViewDetails = (job: JobPostingWithApplication) => {
     // Navigate to job details page
     window.location.href = `/dashboard/jobs/${job.id}`;
   };
@@ -276,6 +362,7 @@ export default function JobsPage() {
         emptyMessage="No job postings found"
         loading={loading}
         onRefresh={loadJobPostings}
+        onRowClick={handleRowClick}
         striped={true}
         hoverable={true}
         bordered={true}

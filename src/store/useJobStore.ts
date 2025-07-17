@@ -21,6 +21,7 @@ interface JobState {
     location: string;
     company_id: string;
     job_type: JobType;
+    salary: string;
   };
   editedJob: {
     title: string;
@@ -28,6 +29,7 @@ interface JobState {
     location: string;
     company_id: string;
     job_type: JobType;
+    salary: string;
   };
   // Actions
   setJobs: (jobs: Job[]) => void;
@@ -38,8 +40,8 @@ interface JobState {
   setSelectedJob: (job: Job | null) => void;
   setIsAddOpen: (isOpen: boolean) => void;
   setIsEditOpen: (isOpen: boolean) => void;
-  setNewJob: (job: { title: string; description: string; location: string; company_id: string; job_type: JobType }) => void;
-  setEditedJob: (job: { title: string; description: string; location: string; company_id: string; job_type: JobType }) => void;
+  setNewJob: (job: { title: string; description: string; location: string; company_id: string; job_type: JobType; salary: string }) => void;
+  setEditedJob: (job: { title: string; description: string; location: string; company_id: string; job_type: JobType; salary: string }) => void;
   // Async actions
   loadJobs: (companyId?: string) => Promise<void>;
   addJob: (companyId?: string) => Promise<void>;
@@ -70,6 +72,7 @@ export const useJobStore = create<JobState>()(
         location: '',
         company_id: '',
         job_type: 'FULL-TIME',
+        salary: '',
       },
       editedJob: {
         title: '',
@@ -77,6 +80,7 @@ export const useJobStore = create<JobState>()(
         location: '',
         company_id: '',
         job_type: 'FULL-TIME',
+        salary: '',
       },
 
       // Actions
@@ -88,8 +92,8 @@ export const useJobStore = create<JobState>()(
       setSelectedJob: (selectedJob: Job | null) => set({ selectedJob }),
       setIsAddOpen: (isAddOpen: boolean) => set({ isAddOpen }),
       setIsEditOpen: (isEditOpen: boolean) => set({ isEditOpen }),
-      setNewJob: (newJob: { title: string; description: string; location: string; company_id: string; job_type: JobType }) => set({ newJob }),
-      setEditedJob: (editedJob: { title: string; description: string; location: string; company_id: string; job_type: JobType }) => set({ editedJob }),
+      setNewJob: (newJob: { title: string; description: string; location: string; company_id: string; job_type: JobType; salary: string }) => set({ newJob }),
+      setEditedJob: (editedJob: { title: string; description: string; location: string; company_id: string; job_type: JobType; salary: string }) => set({ editedJob }),
 
       // Async actions
       loadJobs: async (companyId?: string) => {
@@ -144,6 +148,7 @@ export const useJobStore = create<JobState>()(
               location: newJob.location,
               company_id: newJob.company_id,
               job_type: newJob.job_type,
+              salary_range: newJob.salary,
               status: 'OPEN'
             }]);
 
@@ -181,7 +186,8 @@ export const useJobStore = create<JobState>()(
               description: editedJob.description,
               location: editedJob.location,
               company_id: editedJob.company_id,
-              job_type: editedJob.job_type
+              job_type: editedJob.job_type,
+              salary_range: editedJob.salary
             })
             .eq('job_id', jobId);
 
@@ -230,6 +236,7 @@ export const useJobStore = create<JobState>()(
           location: '',
           company_id: '',
           job_type: 'FULL-TIME',
+          salary: '',
         }
       }),
 
@@ -240,12 +247,13 @@ export const useJobStore = create<JobState>()(
           location: '',
           company_id: '',
           job_type: 'FULL-TIME',
+          salary: '',
         }
       }),
     }),
     {
-      name: 'job-store', 
-      partialize: (state) => ({
+      name: 'job-store',
+      partialize: (state: JobState) => ({
         currentPage: state.currentPage,
         searchTerm: state.searchTerm,
         selectedJob: state.selectedJob,
@@ -253,7 +261,7 @@ export const useJobStore = create<JobState>()(
         isEditOpen: state.isEditOpen,
         newJob: state.newJob,
         editedJob: state.editedJob,
-      }),
+      } as Partial<JobState>),
     }
   )
 ); 

@@ -18,9 +18,33 @@ interface AuthState {
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
   updateUserProfile: (updates: Partial<User>) => Promise<void>;
+  clearAuthData: () => void;
 }
 
 const AUTH_CHECK_INTERVAL = 5 * 60 * 1000; // 5 minutes
+const LOGOUT_EVENT = 'auth-logout-event';
+
+// Cross-tab logout functionality
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', (event) => {
+    if (event.key === LOGOUT_EVENT && event.newValue) {
+      // Clear auth store data
+      useAuthStore.getState().clearAuthData();
+      
+      // Redirect to signin page
+      const currentPath = window.location.pathname;
+      const isAlreadyOnSignin = currentPath === '/signin' || currentPath === '/signup';
+      
+      if (!isAlreadyOnSignin) {
+        // Clear all localStorage data
+        localStorage.clear();
+        
+        // Force redirect to signin page
+        window.location.href = '/signin';
+      }
+    }
+  });
+}
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -30,6 +54,16 @@ export const useAuthStore = create<AuthState>()(
       isLoading: false,
       error: null,
       lastAuthCheck: null,
+
+      clearAuthData: () => {
+        set({ 
+          user: null, 
+          isAuthenticated: false, 
+          isLoading: false, 
+          error: null, 
+          lastAuthCheck: null 
+        });
+      },
 
       login: async (email: string, password: string) => {
         try {
@@ -121,12 +155,33 @@ export const useAuthStore = create<AuthState>()(
       logout: async () => {
         try {
           set({ isLoading: true, error: null });
+          
+          // Sign out from Supabase
           const { error } = await supabase.auth.signOut();
           if (error) throw error;
+          
+          // Clear auth store data
           set({ user: null, isAuthenticated: false, lastAuthCheck: null });
+          
+          // Trigger cross-tab logout event
+          if (typeof window !== 'undefined') {
+            localStorage.setItem(LOGOUT_EVENT, Date.now().toString());
+            // Remove the event immediately to trigger it again next time
+            setTimeout(() => {
+              localStorage.removeItem(LOGOUT_EVENT);
+            }, 100);
+            
+            // Clear all localStorage data
+            localStorage.clear();
+          }
+          
           toast.success('Logged out successfully');
-          // Use router.push instead of window.location.href to avoid conflicts
-          // The auth guard will handle the redirect automatically
+          
+          // Redirect current tab to signin page
+          if (typeof window !== 'undefined') {
+            window.location.href = '/signin';
+          }
+          
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'An error occurred during logout';
           set({ error: errorMessage });

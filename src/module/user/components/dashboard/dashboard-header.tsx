@@ -13,21 +13,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LogOut, User } from "lucide-react";
 import { useUser, useUserProfile } from "@/contexts/SupabaseProvider";
-import { useAuthStore } from "@/store/useAuthStore";
+import { useLogout } from "@/hooks/useLogout";
 
 export function DashboardHeader({ headerTitle }: { headerTitle?: string }) {
   const user = useUser();
   const { userProfile } = useUserProfile();
-  const { logout } = useAuthStore();
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      // The logout function in useAuthStore will handle the redirect
-    } catch (error) {
-      console.error("Error signing out:", error);
-    }
-  };
+  const { handleLogout } = useLogout();
 
   const getInitials = (firstName?: string, lastName?: string) => {
     if (firstName && lastName) {

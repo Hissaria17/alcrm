@@ -58,6 +58,9 @@ ALTER TABLE public.Jobs ENABLE ROW LEVEL SECURITY;
 CREATE INDEX idx_jobs_company ON public.Jobs(company_id);
 CREATE INDEX idx_jobs_posted_by_user ON public.Jobs(posted_by_user_id);
 
+-- Add salary_range field to existing Jobs table (run this after initial setup)
+ALTER TABLE public.Jobs ADD COLUMN salary_range TEXT;
+
 -- Step 5: Create JobApplications table
 CREATE TABLE public.JobApplications (
     application_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

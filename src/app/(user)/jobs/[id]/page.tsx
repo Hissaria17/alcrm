@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { MapPin, Building, Calendar, Clock, FileText, Loader2, ArrowLeft, AlertCircle, CheckCircle } from "lucide-react";
+import { MapPin, Calendar, FileText, Loader2, ArrowLeft, AlertCircle, CheckCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
@@ -108,10 +108,16 @@ export default function JobDetailPage({ params }: JobDetailPageProps) {
   }, [isAuthenticated, user, job, checkApplicationStatus]);
 
   const isJobClosed = job?.status === 'CLOSED';
+  const isAdmin = user?.role === 'ADMIN';
 
   const handleApply = async () => {
     if (!user || !job) {
       toast.error('Please sign in to apply for this job.');
+      return;
+    }
+
+    if (isAdmin) {
+      toast.error('Admins cannot apply for jobs.');
       return;
     }
 
@@ -215,7 +221,6 @@ export default function JobDetailPage({ params }: JobDetailPageProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto p-6">
-        {/* Header */}
         <div className="mb-6">
           <Link href="/dashboard/jobs" className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-4">
             <ArrowLeft className="h-4 w-4" />
@@ -226,10 +231,6 @@ export default function JobDetailPage({ params }: JobDetailPageProps) {
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">{job.title}</h1>
               <div className="flex items-center gap-4 text-gray-600">
-                <div className="flex items-center gap-2">
-                  <Building className="h-4 w-4" />
-                  {job.company}
-                </div>
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
                   {job.location}
@@ -247,9 +248,7 @@ export default function JobDetailPage({ params }: JobDetailPageProps) {
           </div>
         </div>
 
-        {/* Job Details */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content */}
           <div className="lg:col-span-2">
             <Card>
               <CardHeader>
@@ -268,21 +267,25 @@ export default function JobDetailPage({ params }: JobDetailPageProps) {
             </Card>
           </div>
 
-          {/* Sidebar */}
           <div className="space-y-6">
-            {/* Apply Section */}
             <Card>
               <CardHeader>
                 <CardTitle>Apply for this position</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Apply Button */}
                 <div className="mt-6">
                   {!isAuthenticated ? (
                     <Alert>
                       <AlertCircle className="h-4 w-4" />
                       <AlertDescription>
                         Please sign in to apply for this position.
+                      </AlertDescription>
+                    </Alert>
+                  ) : isAdmin ? (
+                    <Alert>
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>
+                        Admin can&apos;t apply for the job.
                       </AlertDescription>
                     </Alert>
                   ) : hasApplied ? (
@@ -318,37 +321,12 @@ export default function JobDetailPage({ params }: JobDetailPageProps) {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Job Summary */}
+                  
             <Card>
               <CardHeader>
                 <CardTitle>Job Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <Building className="h-4 w-4 text-gray-400" />
-                  <div>
-                    <p className="text-sm font-medium">Company</p>
-                    <p className="text-sm text-gray-600">{job.company}</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-3">
-                  <MapPin className="h-4 w-4 text-gray-400" />
-                  <div>
-                    <p className="text-sm font-medium">Location</p>
-                    <p className="text-sm text-gray-600">{job.location}</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-3">
-                  <Clock className="h-4 w-4 text-gray-400" />
-                  <div>
-                    <p className="text-sm font-medium">Job Type</p>
-                    <p className="text-sm text-gray-600">{job.type.replace('-', ' ')}</p>
-                  </div>
-                </div>
-                
                 <div className="flex items-center gap-3">
                   <Calendar className="h-4 w-4 text-gray-400" />
                   <div>

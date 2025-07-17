@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,16 @@ const navigation = [
     href: "/admin/dashboard/companies",
     icon: Users,
   },
+   {
+    name: "Resources",
+    href: "/admin/dashboard/free-resources",
+    icon: User,
+  },
+   {
+    name: "Mentorship Sessions",
+    href: "/admin/dashboard/mentorship-sessions",
+    icon: User,
+  },
   {
     name: "Profile",
     href: "/admin/dashboard/profile",
@@ -56,11 +67,14 @@ export function DashboardSidebar() {
       {/* Logo and Toggle */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200">
         {!collapsed && (
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <Briefcase className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-lg font-semibold text-gray-900">ALCRM</span>
+          <div className="flex items-center">
+            <Image 
+              src="/images/logo_.png" 
+              alt="ALCRM Logo" 
+              width={120} 
+              height={120} 
+              className='rounded-md'
+            />
           </div>
         )}
         <Button

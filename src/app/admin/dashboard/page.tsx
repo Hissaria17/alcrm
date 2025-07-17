@@ -6,6 +6,7 @@ import { DashboardSidebar } from "@/module/admin/components/dashboard/dashboard-
 import { JobPostingsTable } from "@/module/admin/components/dashboard/job-postings-table";
 import { DashboardStats } from "@/module/admin/components/dashboard/dashboard-stats"; 
 import { useAuthGuard } from "@/hooks/useAuthGuard";
+import { useClientRouteGuard } from "@/hooks/useClientRouteGuard";
 import { useUserProfile } from "@/contexts/SupabaseProvider";
 import { supabase } from "@/lib/supabase";
 import { JobPosting, DatabaseJobWithCompanyId } from "@/types/job";
@@ -14,6 +15,9 @@ import { AdminDashboardContentSkeleton } from '@/components/skeletons/admin/admi
 export default function DashboardPage() {
   const { loading: authLoading, isAuthenticated } = useAuthGuard();
   const { userProfile } = useUserProfile();
+  
+  // Client-side route protection
+  useClientRouteGuard();
   const [allJobs, setAllJobs] = useState<JobPosting[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -36,6 +40,7 @@ export default function DashboardPage() {
           job_type,
           location,
           status,
+          salary_range,
           created_at,
           company_id,
           companies (
@@ -81,7 +86,7 @@ export default function DashboardPage() {
             company: companyName,
             location: job.location || 'Not specified',
             type: job.job_type,
-            salary: 'Not specified', // Salary not in current schema
+            salary: job.salary_range || 'Not specified',
             postedDate: new Date(job.created_at).toISOString().split('T')[0],
             status: job.status,
             description: job.description

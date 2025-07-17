@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { SupabaseProvider } from "@/contexts/SupabaseProvider";
 import { Toaster } from "@/components/ui/sonner";
+import { CrossTabLogoutHandler } from "@/components/auth/CrossTabLogoutHandler";
 import { geist } from '@/utils/fonts/font';
 
 export const metadata: Metadata = {
@@ -22,6 +23,7 @@ export default function RootLayout({
       >
         <SupabaseProvider>
           {children}
+          <CrossTabLogoutHandler />
         </SupabaseProvider>
         <Toaster />
       </body>

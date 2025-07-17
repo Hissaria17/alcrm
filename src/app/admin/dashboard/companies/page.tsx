@@ -2,6 +2,9 @@
 
 import { useEffect } from 'react';
 import { useCompanyStore } from '@/store/useCompanyStore';
+import { useAuthGuard } from "@/hooks/useAuthGuard";
+import { useClientRouteGuard } from "@/hooks/useClientRouteGuard";
+import { useAuth } from "@/hooks/useAuth";
 import { DashboardHeader } from "@/module/admin/components/dashboard/dashboard-header";
 import { DashboardSidebar } from "@/module/admin/components/dashboard/dashboard-sidebar";
 import { Button } from "@/components/ui/button";
@@ -10,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Building2, Globe, Calendar, Plus, Eye } from "lucide-react";
+import { truncateToWords } from "@/utils/text";
 import Link from "next/link";
 import { CompaniesTableSkeleton } from "@/components/skeletons/admin/companies-table-skeleton";
 import { DataTable, DataColumn, formatDate } from "@/components/data-table";
@@ -28,6 +32,13 @@ interface Company {
 const ITEMS_PER_PAGE = 10;
 
 export default function CompaniesPage() {
+  // Auth checks
+  const { loading: authLoading, isAuthenticated } = useAuthGuard();
+  const { isAdmin, requireRole } = useAuth();
+  
+  // Client-side route protection
+  useClientRouteGuard();
+
   const {
     companies,
     loading,
@@ -44,9 +55,40 @@ export default function CompaniesPage() {
     addCompany,
   } = useCompanyStore();
 
+  // Verify admin role access
   useEffect(() => {
-    loadCompanies();
-  }, [currentPage, searchTerm, loadCompanies]);
+    if (!authLoading && isAuthenticated) {
+      requireRole(['ADMIN']);
+    }
+  }, [authLoading, isAuthenticated, requireRole]);
+
+  useEffect(() => {
+    if (isAuthenticated && isAdmin) {
+      loadCompanies();
+    }
+  }, [currentPage, searchTerm, loadCompanies, isAuthenticated, isAdmin]);
+
+  // Show loading state while checking authentication
+  if (authLoading) {
+    return (
+      <div className="flex h-screen bg-gray-50">
+        <DashboardSidebar />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <DashboardHeader headerTitle="Companies" />
+          <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
+            <div className="max-w-7xl mx-auto">
+              <CompaniesTableSkeleton />
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render anything if not authenticated or not admin (redirect will happen)
+  if (!isAuthenticated || !isAdmin) {
+    return null;
+  }
 
   const handleAddCompany = async () => {
     await addCompany();
@@ -60,6 +102,11 @@ export default function CompaniesPage() {
     loadCompanies();
   };
 
+  // Handle row click to navigate to company details
+  const handleRowClick = (company: Company) => {
+    window.location.href = `/admin/dashboard/companies/${company.company_id}`;
+  };
+
   // Transform companies data to include id for DataTable
   const transformedCompanies: Company[] = companies.map(company => ({
     id: company.company_id,
@@ -68,7 +115,6 @@ export default function CompaniesPage() {
     website_url: company.website_url ?? "",
   }));
 
-  // Function to get a random demo logo
   const getDemoLogo = (companyId: string) => {
     const demoLogos = [
       "https://ui-avatars.com/api/?name=Company&background=3b82f6&color=fff&size=40&rounded=true&bold=true&format=png",
@@ -121,7 +167,7 @@ export default function CompaniesPage() {
       render: (company) => (
         <div className="max-w-xs">
           <p className="text-sm text-gray-600 truncate">
-            {company.description || "No description available"}
+            {truncateToWords(company.description || "No description available", 3)}
           </p>
         </div>
       ),
@@ -216,6 +262,7 @@ export default function CompaniesPage() {
                   }}
                   loading={loading}
                   onRefresh={handleRefresh}
+                  onRowClick={handleRowClick}
                   striped={true}
                   hoverable={true}
                   bordered={true}
@@ -255,30 +302,27 @@ export default function CompaniesPage() {
                           placeholder="https://company.com"
                         />
                       </div>
-                      <div> 
-                        <Label htmlFor="description" className="mb-2 block">Company Description *</Label>
+                      <div>
+                        <Label htmlFor="description" className="mb-2 block">Description</Label>
                         <Textarea
                           id="description"
                           value={newCompany.description}
                           onChange={(e) => setNewCompany({ ...newCompany, description: e.target.value })}
-                          placeholder="Describe the company..."
-                          rows={4}
-                          required
+                          placeholder="Enter company description"
+                          rows={3}
                         />
                       </div>
-                      <div className="flex justify-end gap-2 pt-4">
-                        <Button
-                          className="cursor-pointer"
-                          variant="outline"
+                      <div className="flex gap-3 pt-4">
+                        <Button 
+                          variant="outline" 
                           onClick={() => setIsAddOpen(false)}
                           disabled={isCreating}
                         >
                           Cancel
                         </Button>
-                        <Button
-                          className="cursor-pointer"
-                          onClick={handleAddCompany}
-                          disabled={isCreating}
+                        <Button 
+                          onClick={handleAddCompany} 
+                          disabled={isCreating || !newCompany.name}
                         >
                           {isCreating ? "Creating..." : "Create Company"}
                         </Button>

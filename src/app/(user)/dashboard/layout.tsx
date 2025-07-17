@@ -3,6 +3,7 @@
 import { DashboardHeader } from "@/module/user/components/dashboard/dashboard-header";
 import { DashboardSidebar } from "@/module/user/components/dashboard/dashboard-sidebar";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
+import { useClientRouteGuard } from "@/hooks/useClientRouteGuard";
 
 export default function UserLayout({
   children,
@@ -10,6 +11,9 @@ export default function UserLayout({
   children: React.ReactNode;
 }) {
   const { loading, isAuthenticated } = useAuthGuard();
+  
+  // Client-side route protection
+  useClientRouteGuard();
 
   // Show loading state while checking authentication
   if (loading) {

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useCallback, useRef, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,8 +19,9 @@ import { Eye, EyeOff, Loader2, Mail, Lock, ArrowRight, Sparkles } from "lucide-r
 import { useAuthStore } from "@/store/useAuthStore";
 import { toast } from "sonner";
 import { AuthSkeleton } from "@/components/skeletons/auth-skeleton";
+import { isPublicRoute, DEFAULT_REDIRECTS, type UserRole } from "@/lib/auth-utils";
 
-export default function SignInPage() {
+function SignInForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -28,12 +29,56 @@ export default function SignInPage() {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [error, setError] = useState("");
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, isAuthenticated, checkAuth, login } = useAuthStore();
   
 
   const routerRef = useRef(router);
   routerRef.current = router;
 
+  // Helper function to get safe redirect URL
+  const getRedirectUrl = useCallback((userRole: UserRole | null) => {
+    const returnUrl = searchParams.get('returnUrl');
+    
+    // If no return URL, use default redirects
+    if (!returnUrl) {
+      return userRole === 'ADMIN' ? DEFAULT_REDIRECTS.ADMIN : DEFAULT_REDIRECTS.USER;
+    }
+
+    // Security check: Only allow safe internal redirects
+    // Prevent open redirect vulnerabilities
+    if (returnUrl.startsWith('http') || returnUrl.startsWith('//')) {
+      console.warn('Blocked external redirect attempt:', returnUrl);
+      return userRole === 'ADMIN' ? DEFAULT_REDIRECTS.ADMIN : DEFAULT_REDIRECTS.USER;
+    }
+
+    // Don't redirect to auth pages
+    if (returnUrl === '/signin' || returnUrl === '/signup') {
+      return userRole === 'ADMIN' ? DEFAULT_REDIRECTS.ADMIN : DEFAULT_REDIRECTS.USER;
+    }
+
+    // For admins, only allow admin routes or public routes
+    if (userRole === 'ADMIN') {
+      if (returnUrl.startsWith('/admin') || isPublicRoute(returnUrl)) {
+        return returnUrl;
+      }
+      return DEFAULT_REDIRECTS.ADMIN;
+    }
+
+    // For users, only allow user routes or public routes, but not admin routes
+    if (userRole === 'USER') {
+      if (returnUrl.startsWith('/admin')) {
+        return DEFAULT_REDIRECTS.USER;
+      }
+      if (returnUrl.startsWith('/dashboard') || isPublicRoute(returnUrl)) {
+        return returnUrl;
+      }
+      return DEFAULT_REDIRECTS.USER;
+    }
+
+    // Fallback
+    return DEFAULT_REDIRECTS.USER;
+  }, [searchParams]);
 
   const checkUserAuth = useCallback(async () => {
     let isMounted = true;
@@ -46,11 +91,8 @@ export default function SignInPage() {
       const { isAuthenticated: currentAuth, user: currentUser } = useAuthStore.getState();
       
       if (currentAuth && currentUser) {
-        if (currentUser.role === 'ADMIN') {
-          routerRef.current.push('/admin/dashboard');
-        } else {
-          routerRef.current.push('/dashboard');
-        }
+        const redirectUrl = getRedirectUrl(currentUser.role as UserRole);
+        routerRef.current.push(redirectUrl);
       }
     } catch (error) {
       console.error('Auth check error:', error);
@@ -63,7 +105,7 @@ export default function SignInPage() {
     return () => {
       isMounted = false;
     };
-  }, [checkAuth]);
+  }, [checkAuth, getRedirectUrl]);
 
   useEffect(() => {
     checkUserAuth();
@@ -76,11 +118,8 @@ export default function SignInPage() {
 
     try {
       const user = await login(email, password);
-      if (user?.role === 'ADMIN') {
-        router.push('/admin/dashboard');
-      } else {
-        router.push('/dashboard');
-      }
+      const redirectUrl = getRedirectUrl(user?.role as UserRole);
+      router.push(redirectUrl);
     } catch (err: unknown) {
       console.error("Signin error:", err);
       const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred";
@@ -227,5 +266,13 @@ export default function SignInPage() {
         </form>
       </Card>
     </div>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense fallback={<AuthSkeleton type="signin" />}>
+      <SignInForm />
+    </Suspense>
   );
 }

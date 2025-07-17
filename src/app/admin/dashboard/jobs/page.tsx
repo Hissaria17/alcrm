@@ -31,14 +31,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Plus, Edit,  MapPin, Building, Calendar, Share2 } from "lucide-react";
+import { truncateToWords } from "@/utils/text";
 import { supabase } from "@/lib/supabase";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
+import { useClientRouteGuard } from "@/hooks/useClientRouteGuard";
 import { toast } from "sonner";
 import Link from "next/link";
 import { JobPosting, RawJobData } from "@/types/job";
 import { SocialShareDialog } from "@/components/ui/social-share-dialog";
 import { AdminJobsTableSkeleton } from '@/components/skeletons/admin/admin-jobs-table-skeleton';
-import { DataTable, DataColumn, formatDate, getStatusBadge, getTypeBadge } from "@/components/data-table";
+import { DataTable, DataColumn, formatDate, getStatusBadge } from "@/components/data-table";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -48,6 +50,10 @@ interface JobWithId extends JobPosting {
 
 export default function JobsPage() {
   const { loading: authLoading, isAuthenticated } = useAuthGuard();
+  
+  // Client-side route protection
+  useClientRouteGuard();
+  
   const [jobPostings, setJobPostings] = useState<JobWithId[]>([]);
   const [editingJob, setEditingJob] = useState<JobPosting | null>(null);
   const [deletingJobId, setDeletingJobId] = useState<string | null>(null);
@@ -85,6 +91,7 @@ export default function JobsPage() {
           job_type,
           location,
           status,
+          salary_range,
           created_at,
           company_id,
           companies (
@@ -161,7 +168,7 @@ export default function JobsPage() {
             company: companyName,
             location: job.location || 'Not specified',
             type: job.job_type,
-            salary: 'Not specified', // Salary not in current schema
+            salary: job.salary_range || 'Not specified',
             postedDate: new Date(job.created_at).toISOString().split('T')[0],
             status: job.status,
             description: job.description,
@@ -229,6 +236,7 @@ export default function JobsPage() {
           job_type: formData.type,
           location: formData.location,
           status: formData.status,
+          salary_range: formData.salary,
           company_id: companyId,
         }]);
 
@@ -288,6 +296,7 @@ export default function JobsPage() {
           job_type: formData.type,
           location: formData.location,
           status: formData.status,
+          salary_range: formData.salary,
           company_id: companyId,
         })
         .eq('job_id', editingJob.id);
@@ -377,6 +386,11 @@ export default function JobsPage() {
     loadJobPostings();
   };
 
+  // Handle row click to navigate to job details
+  const handleRowClick = (job: JobWithId) => {
+    window.location.href = `/admin/dashboard/jobs/${job.id}`;
+  };
+
   const columns: DataColumn<JobWithId>[] = [
     {
       key: "title",
@@ -387,10 +401,10 @@ export default function JobsPage() {
             href={`/admin/dashboard/jobs/${job.id}`}
             className="font-semibold truncate block"
           >
-            {job.title}
+            {truncateToWords(job.title, 3)}
           </Link>
           <div className="text-sm text-gray-500 truncate max-w-xs">
-            {job.description.substring(0, 80)}...
+            {truncateToWords(job.description, 3)}
           </div>
         </div>
       ),
@@ -419,9 +433,13 @@ export default function JobsPage() {
       sortable: true,
     },
     {
-      key: "type",
-      header: "Type",
-      render: (job) => getTypeBadge(job.type),
+      key: "salary",
+      header: "Salary",
+      render: (job) => (
+        <div className="min-w-0">
+          <span className="truncate">{job.salary}</span>
+        </div>
+      ),
       sortable: true,
     },
     {
@@ -543,6 +561,7 @@ export default function JobsPage() {
                   }}
                   loading={loading}
                   onRefresh={handleRefresh}
+                  onRowClick={handleRowClick}
                   striped={true}
                   hoverable={true}
                   bordered={true}
@@ -602,6 +621,18 @@ export default function JobsPage() {
                           onChange={handleInputChange}
                           placeholder="e.g. New York, NY or Remote"
                           required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="salary"
+                        className="mb-2 block"
+                        >Salary Range</Label>
+                        <Input
+                          id="salary"
+                          name="salary"
+                          value={formData.salary}
+                          onChange={handleInputChange}
+                          placeholder="e.g. ₹8,00,000 - ₹12,00,000"
                         />
                       </div>
                       <div>
@@ -714,6 +745,18 @@ export default function JobsPage() {
                           onChange={handleInputChange}
                           placeholder="e.g. New York, NY or Remote"
                           required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="edit-salary"
+                        className="mb-2 block"
+                        >Salary Range</Label>
+                        <Input
+                          id="edit-salary"
+                          name="salary"
+                          value={formData.salary}
+                          onChange={handleInputChange}
+                          placeholder="e.g. ₹8,00,000 - ₹12,00,000"
                         />
                       </div>
                       <div>

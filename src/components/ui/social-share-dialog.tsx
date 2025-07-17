@@ -9,10 +9,8 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { 
   Share2, 
   Copy, 
@@ -22,9 +20,6 @@ import {
   MessageCircle,
   ExternalLink,
   Check,
-  Building,
-  MapPin,
-  Calendar
 } from "lucide-react";
 import { toast } from "sonner";
 import { JobPosting } from "@/types/job";
@@ -37,7 +32,7 @@ interface SocialShareDialogProps {
 
 export function SocialShareDialog({ job, open, onOpenChange }: SocialShareDialogProps) {
   const [copied, setCopied] = useState(false);
-  const [customMessage, setCustomMessage] = useState("");
+  const [customMessage] = useState("");
 
   // Generate the application URL
   const applicationUrl = job ? `${window.location.origin}/jobs/${job.id}` : '';
@@ -46,7 +41,7 @@ export function SocialShareDialog({ job, open, onOpenChange }: SocialShareDialog
   const generateDefaultMessage = () => {
     if (!job) return '';
     const jobType = job.type.replace('-', ' ').toLowerCase();
-    return `🚀 New ${jobType} opportunity!\n\n📋 ${job.title}\n📍 ${job.location}\n\nApply now and take the next step in your career! 👇\n\n${applicationUrl}`;
+    return `New ${jobType} opportunity!\n\n📋 ${job.title}\n ${job.location}\n\nApply now and take the next step in your career! \n\n${applicationUrl}`;
   };
 
   const defaultMessage = generateDefaultMessage();
@@ -66,7 +61,7 @@ export function SocialShareDialog({ job, open, onOpenChange }: SocialShareDialog
 
   // Share on Twitter
   const shareOnTwitter = () => {
-    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(messageToShare)}`;
+    const twitterUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(messageToShare)}`;
     window.open(twitterUrl, '_blank');
   };
 
@@ -95,204 +90,127 @@ export function SocialShareDialog({ job, open, onOpenChange }: SocialShareDialog
     window.open(telegramUrl, '_blank');
   };
 
-  const getJobTypeBadge = (type: string) => {
-    const typeConfig = {
-      "FULL-TIME": { label: "Full-Time", className: "bg-blue-100 text-blue-800" },
-      "PART-TIME": { label: "Part-Time", className: "bg-purple-100 text-purple-800" },
-      "CONTRACT": { label: "Contract", className: "bg-orange-100 text-orange-800" },
-      "INTERNSHIP": { label: "Internship", className: "bg-green-100 text-green-800" },
-    };
-
-    const config = typeConfig[type as keyof typeof typeConfig] || { label: type, className: "" };
-    
-    return (
-      <Badge className={`${config.className} hover:${config.className}`}>
-        {config.label}
-      </Badge>
-    );
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
-        <DialogHeader className="flex-shrink-0 pb-6">
-          <DialogTitle className="flex items-center gap-2 text-xl font-bold">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-              <Share2 className="h-5 w-5 text-blue-600" />
+      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0 pb-4">
+          <DialogTitle className="flex items-center gap-2 text-lg font-bold">
+            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+              <Share2 className="h-4 w-4 text-blue-600" />
             </div>
             Share Job Posting
           </DialogTitle>
-          <DialogDescription className="text-gray-600">
+          <DialogDescription className="text-gray-600 text-sm">
             Share this job opportunity with your network to help qualified candidates discover it.
           </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-6 flex-1 overflow-y-auto">
+        <div className="space-y-4 flex-1 overflow-y-auto">
           {job ? (
             <>
-              {/* Job Preview Card */}
-              <Card className="border border-gray-200 shadow-sm">
-                <CardContent className="p-6">
+              {/* Share Actions & Preview Combined */}
+              <Card className="border border-gray-200 shadow-lg">
+                <CardContent>
                   <div className="space-y-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">{job.title}</h3>
-                        <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
-                          <div className="flex items-center gap-1">
-                            <Building className="h-4 w-4" />
-                            <span>{job.company}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <MapPin className="h-4 w-4" />
-                            <span>{job.location}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-4 w-4" />
-                            <span>Posted {job.postedDate}</span>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          {getJobTypeBadge(job.type)}
-                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                            {job.status}
-                          </Badge>
-                        </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center">
+                        <Share2 className="h-3 w-3 text-white" />
                       </div>
-                    </div>
-                    <div className="pt-4 border-t border-gray-100">
-                      <p className="text-sm text-gray-600 line-clamp-3">
-                        {job.description}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Custom Message Section */}
-              <Card className="border border-gray-200 shadow-sm">
-                <CardContent className="p-6">
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="message" className="text-sm font-semibold text-gray-900 mb-2 block">
-                        Customize your message
-                      </Label>
-                      <Textarea
-                        id="message"
-                        value={customMessage}
-                        onChange={(e) => setCustomMessage(e.target.value)}
-                        placeholder={defaultMessage}
-                        rows={6}
-                        className="resize-none border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-                      />
+                      <h4 className="text-base font-semibold text-gray-900">Share on social platforms</h4>
                     </div>
                     
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div className="flex-1">
-                        <p className="text-xs font-medium text-gray-700 mb-1">Application URL</p>
-                        <p className="text-sm text-gray-600 truncate">{applicationUrl}</p>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          navigator.clipboard.writeText(applicationUrl);
-                          toast.success("URL copied!");
-                        }}
-                        className="ml-3 flex-shrink-0"
-                      >
-                        <Copy className="h-4 w-4 mr-1" />
-                        Copy
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Share Actions */}
-              <Card className="border border-gray-200 shadow-sm">
-                <CardContent className="p-6">
-                  <div className="space-y-4">
-                    <h4 className="text-sm font-semibold text-gray-900">Share on social platforms</h4>
-                    
-                    <div className="grid grid-cols-1 gap-3">
+                    <div className="grid grid-cols-1 gap-2">
                       <Button
                         onClick={copyToClipboard}
                         variant="outline"
-                        className="justify-start h-12 border-gray-200 hover:bg-gray-50"
+                        className="justify-start h-12 border-2 border-gray-200 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 hover:border-gray-300 transition-all duration-200 cursor-pointer"
                       >
                         {copied ? (
                           <>
-                            <Check className="h-5 w-5 mr-3 text-green-600" />
-                            <span className="font-medium">Copied to clipboard!</span>
+                            <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                              <Check className="h-4 w-4 text-green-600" />
+                            </div>
+                            <span className="font-semibold text-green-700">Copied to clipboard!</span>
                           </>
                         ) : (
                           <>
-                            <Copy className="h-5 w-5 mr-3 text-gray-600" />
-                            <span className="font-medium">Copy message to clipboard</span>
+                            <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
+                              <Copy className="h-4 w-4 text-gray-600" />
+                            </div>
+                            <span className="font-semibold text-gray-700">Copy message to clipboard</span>
                           </>
                         )}
                       </Button>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 gap-2">
                       <Button
                         onClick={shareOnTwitter}
                         variant="outline"
-                        className="justify-start h-12 border-gray-200 hover:bg-blue-50 hover:border-blue-200"
+                        className="justify-start h-12 border-2 border-gray-200 hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 hover:border-blue-300 transition-all duration-200 cursor-pointer"
                       >
-                        <Twitter className="h-5 w-5 mr-3 text-blue-500" />
-                        <span className="font-medium">Twitter</span>
+                        <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-2">
+                          <Twitter className="h-4 w-4 text-blue-500" />
+                        </div>
+                        <span className="font-semibold text-gray-700">Twitter</span>
                       </Button>
                       
                       <Button
                         onClick={shareOnLinkedIn}
                         variant="outline"
-                        className="justify-start h-12 border-gray-200 hover:bg-blue-50 hover:border-blue-200"
+                        className="justify-start h-12 border-2 border-gray-200 hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 hover:border-blue-300 transition-all duration-200 cursor-pointer"
                       >
-                        <Linkedin className="h-5 w-5 mr-3 text-blue-700" />
-                        <span className="font-medium">LinkedIn</span>
+                        <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-2">
+                          <Linkedin className="h-4 w-4 text-blue-700" />
+                        </div>
+                        <span className="font-semibold text-gray-700">LinkedIn</span>
                       </Button>
                       
                       <Button
                         onClick={shareOnFacebook}
                         variant="outline"
-                        className="justify-start h-12 border-gray-200 hover:bg-blue-50 hover:border-blue-200"
+                        className="justify-start h-12 border-2 border-gray-200 hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 hover:border-blue-300 transition-all duration-200 cursor-pointer"
                       >
-                        <Facebook className="h-5 w-5 mr-3 text-blue-600" />
-                        <span className="font-medium">Facebook</span>
+                        <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-2">
+                          <Facebook className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <span className="font-semibold text-gray-700">Facebook</span>
                       </Button>
                       
                       <Button
                         onClick={shareOnWhatsApp}
                         variant="outline"
-                        className="justify-start h-12 border-gray-200 hover:bg-green-50 hover:border-green-200"
+                        className="justify-start h-12 border-2 border-gray-200 hover:bg-gradient-to-r hover:from-green-50 hover:to-green-100 hover:border-green-300 transition-all duration-200 cursor-pointer"
                       >
-                        <MessageCircle className="h-5 w-5 mr-3 text-green-600" />
-                        <span className="font-medium">WhatsApp</span>
+                        <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-2">
+                          <MessageCircle className="h-4 w-4 text-green-600" />
+                        </div>
+                        <span className="font-semibold text-gray-700">WhatsApp</span>
                       </Button>
                     </div>
 
                     <Button
                       onClick={shareOnTelegram}
                       variant="outline"
-                      className="w-full justify-start h-12 border-gray-200 hover:bg-blue-50 hover:border-blue-200"
+                      className="w-full justify-start h-12 border-2 border-gray-200 hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 hover:border-blue-300 transition-all duration-200 cursor-pointer"
                     >
-                      <ExternalLink className="h-5 w-5 mr-3 text-blue-600" />
-                      <span className="font-medium">Telegram</span>
+                      <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                        <ExternalLink className="h-4 w-4 text-blue-600" />
+                      </div>
+                      <span className="font-semibold text-gray-700">Telegram</span>
                     </Button>
-                  </div>
-                </CardContent>
-              </Card>
 
-              {/* Preview Section */}
-              <Card className="border border-gray-200 shadow-sm">
-                <CardContent className="p-6">
-                  <div className="space-y-3">
-                    <Label className="text-sm font-semibold text-gray-900">Message Preview</Label>
-                    <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                      <pre className="text-sm text-gray-700 whitespace-pre-wrap font-sans leading-relaxed">
-                        {messageToShare}
-                      </pre>
+                    {/* Separator */}
+                    <div className="border-t border-gray-200 my-4"></div>
+
+                    {/* Preview Section */}
+                    <div className="space-y-3">
+                      <Label className="text-sm font-semibold text-gray-900">Message Preview</Label>
+                      <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <pre className="text-xs text-gray-700 whitespace-pre-wrap font-sans leading-relaxed">
+                          {messageToShare}
+                        </pre>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -300,13 +218,13 @@ export function SocialShareDialog({ job, open, onOpenChange }: SocialShareDialog
             </>
           ) : (
             <Card className="border border-gray-200 shadow-sm">
-              <CardContent className="p-12">
+              <CardContent className="p-8">
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Share2 className="h-8 w-8 text-gray-400" />
+                  <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Share2 className="h-6 w-6 text-gray-400" />
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No job selected</h3>
-                  <p className="text-gray-600">Please select a job to share</p>
+                  <h3 className="text-base font-medium text-gray-900 mb-2">No job selected</h3>
+                  <p className="text-gray-600 text-sm">Please select a job to share</p>
                 </div>
               </CardContent>
             </Card>

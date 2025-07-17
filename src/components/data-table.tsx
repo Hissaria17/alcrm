@@ -123,6 +123,7 @@ export interface DataTableProps<T> {
     title: string;
     description: string;
   };
+  onRowClick?: (item: T) => void;
   className?: string;
   cardProps?: {
     showCard?: boolean;
@@ -170,6 +171,7 @@ export function DataTable<T extends { id?: string | number }>({
     title: "Are you absolutely sure?",
     description: "This action cannot be undone.",
   },
+  onRowClick,
   className = "",
   cardProps = { showCard: true },
   tableProps = {},
@@ -432,8 +434,10 @@ export function DataTable<T extends { id?: string | number }>({
                   tableProps.rowClassName,
                   hoverable && themeStyles.hover,
                   striped && index % 2 === 1 && "bg-gray-50/50",
-                  compact ? "py-1" : "py-2"
+                  compact ? "py-1" : "py-2",
+                  onRowClick && "cursor-pointer"
                 )}
+                onClick={() => onRowClick && onRowClick(item)}
               >
                 {showRowNumbers && (
                   <TableCell className={cn(
@@ -478,7 +482,12 @@ export function DataTable<T extends { id?: string | number }>({
                           return (
                             <DropdownMenuItem
                               key={actionIndex}
-                              onClick={() => !isDisabled && action.onClick(item)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (!isDisabled) {
+                                  action.onClick(item);
+                                }
+                              }}
                               className={cn(
                                 action.className,
                                 isDisabled && "opacity-50 cursor-not-allowed"
@@ -494,7 +503,10 @@ export function DataTable<T extends { id?: string | number }>({
                           <>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
-                              onClick={() => setDeleteItem(item)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDeleteItem(item);
+                              }}
                               className="text-red-600"
                             >
                               <Trash2 className="mr-2 h-4 w-4" />

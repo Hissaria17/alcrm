@@ -6,6 +6,7 @@ import { Edit, Eye, Calendar, Copy, Plus } from "lucide-react";
 import { JobPosting } from "@/types/job";
 import { EditJobDialog } from "./edit-job-dialog";
 import { AddJobDialog } from "./add-job-dialog";
+import { truncateToWords } from "@/utils/text";
 
 interface JobPostingsTableProps {
   jobPostings: JobPosting[];
@@ -49,7 +50,12 @@ export function JobPostingsTable({
 
   const handleViewDetails = (job: JobPosting) => {
     // Navigate to job details page
-    window.open(`/admin/dashboard/jobs/${job.id}`, '_blank');
+    window.location.href = `/admin/dashboard/jobs/${job.id}`;
+  };
+
+  // Handle row click to navigate to job details
+  const handleRowClick = (job: JobPosting) => {
+    window.location.href = `/admin/dashboard/jobs/${job.id}`;
   };
 
   // Define table columns
@@ -59,9 +65,9 @@ export function JobPostingsTable({
       header: "Job Title",
       render: (job) => (
         <div>
-          <div className="font-semibold text-gray-900">{job.title}</div>
+          <div className="font-semibold text-gray-900">{truncateToWords(job.title, 3)}</div>
           <div className="text-sm text-gray-500 truncate max-w-xs">
-            {job.description}
+            {truncateToWords(job.description, 3)}
           </div>
         </div>
       ),
@@ -188,6 +194,7 @@ export function JobPostingsTable({
         }}
         loading={loading}
         onRefresh={onRefresh}
+        onRowClick={handleRowClick}
         showRowNumbers={true}
         striped={true}
         hoverable={true}

@@ -73,6 +73,7 @@ export default function JobDetailPage() {
           job_type,
           location,
           status,
+          salary_range,
           created_at,
           companies (
             company_id,
@@ -101,6 +102,7 @@ export default function JobDetailPage() {
           job_type: jobData.job_type,
           location: jobData.location,
           status: jobData.status,
+          salary_range: jobData.salary_range,
           created_at: jobData.created_at,
           company: Array.isArray(jobData.companies) ? jobData.companies[0] : jobData.companies
         });
@@ -385,6 +387,12 @@ export default function JobDetailPage() {
                 <Clock className="h-4 w-4" />
                 <span>{job.job_type}</span>
               </div>
+              {job.salary_range && (
+                <div className="flex items-center gap-2">
+                  <span className="text-green-600 font-medium">₹</span>
+                  <span>{job.salary_range}</span>
+                </div>
+              )}
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
                 <span>Posted {formatDate(job.created_at)}</span>
@@ -638,6 +646,16 @@ export default function JobDetailPage() {
                       </p>
                     )}
                   </div>
+                  
+                  {job.salary_range && (
+                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <span className="text-green-600 font-medium">₹</span>
+                        <span className="font-semibold text-green-800">{job.salary_range}</span>
+                      </div>
+                      <p className="text-xs text-green-600 mt-1">Salary Range</p>
+                    </div>
+                  )}
                   
                   {job.company.website_url && (
                     <div>

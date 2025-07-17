@@ -166,6 +166,11 @@ export default function JobApplicationsPage({
     loadApplications();
   };
 
+  // Handle row click to navigate to candidate details
+  const handleRowClick = (application: ApplicationWithId) => {
+    router.push(`/admin/dashboard/applications/${jobId}/${application.candidate_id}`);
+  };
+
   const getStatusBadge = (status: ApplicationStatus) => {
     switch (status) {
       case "APPLIED":
@@ -320,6 +325,7 @@ export default function JobApplicationsPage({
                   }}
                   loading={loading}
                   onRefresh={handleRefresh}
+                  onRowClick={handleRowClick}
                   striped={true}
                   hoverable={true}
                   bordered={true}

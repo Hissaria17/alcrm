@@ -35,6 +35,23 @@ export const PROFILE_PICTURE_UPLOAD_VALIDATION: UploadValidation = {
   allowedExtensions: ['.jpg', '.jpeg', '.png', '.webp', '.gif']
 };
 
+// Default validation for free resource uploads
+export const FREE_RESOURCE_UPLOAD_VALIDATION: UploadValidation = {
+  maxSize: 10 * 1024 * 1024, // 10MB
+  allowedTypes: [
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'image/jpeg',
+    'image/png',
+    'image/gif',
+    'video/mp4',
+    'video/quicktime',
+    'video/x-msvideo'
+  ],
+  allowedExtensions: ['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png', '.gif', '.mp4', '.mov', '.avi']
+};
+
 /**
  * Validates a file for upload
  */
@@ -583,6 +600,122 @@ export async function uploadProfilePictureAndUpdateProfile(
         success: false,
         error: updateResult.error
       };
+    }
+
+    return uploadResult;
+
+  } catch (error) {
+    console.error('Complete upload workflow error:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unexpected error occurred'
+    };
+  }
+}
+
+/**
+ * Generates a unique filename for free resources
+ */
+export function generateFreeResourceFileName(userId: string, originalFileName: string): string {
+  if (!userId) {
+    throw new Error('userId is required for free resource upload');
+  }
+  
+  const randomId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  const fileExtension = originalFileName.split('.').pop()?.toLowerCase() || 'pdf';
+  
+  // Create path: userId/randomId.extension
+  // This ensures the first folder is the user ID as required by the storage policy
+  return `${userId}/${randomId}.${fileExtension}`;
+}
+
+/**
+ * Uploads a free resource file to Supabase storage
+ */
+export async function uploadFreeResource(
+  file: File, 
+  userId: string, 
+  validation: UploadValidation = FREE_RESOURCE_UPLOAD_VALIDATION
+): Promise<UploadResult> {
+  try {
+    // Validate userId is provided
+    if (!userId) {
+      return {
+        success: false,
+        error: 'User ID is required for free resource upload'
+      };
+    }
+
+    // Validate the file
+    const validationResult = validateFile(file, validation);
+    if (!validationResult.isValid) {
+      return {
+        success: false,
+        error: validationResult.error
+      };
+    }
+
+    // Generate unique filename
+    const fileName = generateFreeResourceFileName(userId, file.name);
+
+    // Upload to Supabase storage
+    const { error } = await supabase.storage
+      .from('free-resources')
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false // Don't overwrite existing files
+      });
+
+    if (error) {
+      console.error('Upload error:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to upload file'
+      };
+    }
+
+    // Get the public URL
+    const { data: urlData } = supabase.storage
+      .from('free-resources')
+      .getPublicUrl(fileName);
+
+    return {
+      success: true,
+      url: urlData.publicUrl,
+      fileName: fileName
+    };
+
+  } catch (error) {
+    console.error('Upload error:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unexpected error occurred'
+    };
+  }
+}
+
+/**
+ * Complete free resource upload workflow - uploads file and returns URL
+ */
+export async function uploadFreeResourceAndGetUrl(
+  file: File, 
+  userId: string, 
+  validation: UploadValidation = FREE_RESOURCE_UPLOAD_VALIDATION
+): Promise<UploadResult> {
+  try {
+    // Validate userId is provided
+    if (!userId) {
+      return {
+        success: false,
+        error: 'User ID is required for free resource upload'
+      };
+    }
+
+    // Upload the file
+    const uploadResult = await uploadFreeResource(file, userId, validation);
+    
+    if (!uploadResult.success) {
+      return uploadResult;
     }
 
     return uploadResult;
