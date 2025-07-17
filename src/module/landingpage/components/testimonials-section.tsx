@@ -1,34 +1,34 @@
 'use client';
 
-import { Star } from 'lucide-react';
-import Image from 'next/image';
+import { Star, UserRound } from 'lucide-react';
 
 const testimonials = [
   {
-    name: 'Sarah Johnson',
-    role: 'Software Engineer',
-    company: 'Google',
-    avatar: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop',
-    content: 'ALCRM helped me land my dream job at Google! The mentorship sessions were invaluable and the resume review made all the difference.',
+    name: 'CA Ritika Singh',
+    role: 'Independent Tax Consultant',
+    company: '',
+    gender: 'female',
+    content: 'ALCRM helped me clear my CA Final on the first attempt and kickstart my consulting career. The mentorship and mock interviews were spot on.',
     rating: 5
   },
   {
-    name: 'Michael Chen',
-    role: 'Product Manager',
-    company: 'Meta',
-    avatar: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop',
-    content: 'The interview resources and practice sessions gave me the confidence I needed. I received 3 job offers within a month!',
-    rating: 5
+    name: 'CA Dharmendra Shivhare',
+    role: 'Finance Manager',
+    company: 'MNC (Big 4)',
+    gender: 'male',
+    content: 'The case study preparation and expert sessions at ALCRM helped me land a job at a Big 4 right after qualifying. Their structured approach really works.',
+    rating: 4
   },
   {
-    name: 'Emily Rodriguez',
-    role: 'UX Designer',
-    company: 'Airbnb',
-    avatar: 'https://images.pexels.com/photos/1181519/pexels-photo-1181519.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop',
-    content: 'The career guidance and networking opportunities through ALCRM opened doors I never thought possible. Highly recommended!',
-    rating: 5
+    name: 'Megha Garg',
+    role: 'Audit Associate',
+    company: 'Mid-size CA Firm',
+    gender: 'female',
+    content: 'I was confused after my articleship, but ALCRM\'s career guidance helped me pick the right role and build confidence during interviews.',
+    rating: 4
   }
 ];
+
 
 export default function TestimonialsSection() {
   return (
@@ -63,17 +63,13 @@ export default function TestimonialsSection() {
               </p>
               
               <div className="flex items-center space-x-4">
-                <Image
-                  src={testimonial.avatar}
-                  alt={testimonial.name}
-                  width={48}
-                  height={48}
-                  className="w-12 h-12 rounded-full object-cover"
-                />
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
+                  <UserRound className="w-7 h-7 text-white" />
+                </div>
                 <div>
                   <div className="font-semibold text-gray-900">{testimonial.name}</div>
                   <div className="text-sm text-gray-600">
-                    {testimonial.role} at {testimonial.company}
+                    {testimonial.role} {testimonial.company && `at ${testimonial.company}`}
                   </div>
                 </div>
               </div>

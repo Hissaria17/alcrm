@@ -17,9 +17,9 @@ export default function HeroSection() {
                 <span>50,000+ jobs posted this month</span>
               </div>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                Find Your
+              Empower your 
                 <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  {' '}Dream Career
+                  {' '}career journey
                 </span>
               </h1>
               <p className="text-xl text-gray-600 leading-relaxed">
@@ -60,63 +60,64 @@ export default function HeroSection() {
 
           {/* Visual */}
           <div className="relative">
-            <div className="relative z-10 bg-white rounded-2xl shadow-2xl p-8 border border-gray-200/50">
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900">Career Success Stories</h3>
-                  <div className="flex items-center space-x-2 text-green-600">
-                    <Star className="w-4 h-4 fill-current" />
-                    <span className="text-sm font-medium">4.9/5 rating</span>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-4 p-4 bg-blue-50 rounded-lg">
-                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
-                      <Briefcase className="w-6 h-6 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-semibold text-gray-900">Sarah landed at Google</div>
-                      <div className="text-sm text-gray-600">Frontend Developer • $150k salary</div>
-                    </div>
-                    <div className="text-sm text-blue-600 font-medium">Success</div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-4 p-4 bg-green-50 rounded-lg">
-                    <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-500 rounded-lg flex items-center justify-center">
-                      <Users className="w-6 h-6 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-semibold text-gray-900">Mike got promoted</div>
-                      <div className="text-sm text-gray-600">Product Manager • 40% salary increase</div>
-                    </div>
-                    <div className="text-sm text-green-600 font-medium">Promoted</div>
-                  </div>
-
-                  <div className="flex items-center space-x-4 p-4 bg-purple-50 rounded-lg">
-                    <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                      <Star className="w-6 h-6 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-semibold text-gray-900">Emily switched careers</div>
-                      <div className="text-sm text-gray-600">UX Designer • Dream role achieved</div>
-                    </div>
-                    <div className="text-sm text-purple-600 font-medium">Career Change</div>
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">95%</div>
-                    <div className="text-sm text-gray-600">Success Rate</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="absolute -top-4 -right-4 w-32 h-32 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full opacity-20 blur-xl"></div>
-            <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full opacity-20 blur-xl"></div>
+  <div className="relative z-10 bg-white rounded-2xl shadow-2xl p-8 border border-gray-200/50">
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-gray-900">Career Success Stories</h3>
+        <div className="flex items-center space-x-2 text-green-600">
+          <Star className="w-4 h-4 fill-current" />
+          <span className="text-sm font-medium">4.9/5 rating</span>
+        </div>
+      </div>
+      
+      <div className="space-y-4">
+        <div className="flex items-center space-x-4 p-4 bg-blue-50 rounded-lg">
+          <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
+            <Briefcase className="w-6 h-6 text-white" />
           </div>
+          <div className="flex-1">
+            <div className="font-semibold text-gray-900">Anjali cleared CA Final</div>
+            <div className="text-sm text-gray-600">Secured Big 4 job offer after first attempt</div>
+          </div>
+          <div className="text-sm text-blue-600 font-medium">Hired</div>
+        </div>
+        
+        <div className="flex items-center space-x-4 p-4 bg-green-50 rounded-lg">
+          <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-500 rounded-lg flex items-center justify-center">
+            <Users className="w-6 h-6 text-white" />
+          </div>
+          <div className="flex-1">
+            <div className="font-semibold text-gray-900">Rohit started his own CA practice</div>
+            <div className="text-sm text-gray-600">Built a strong client base within 6 months</div>
+          </div>
+          <div className="text-sm text-green-600 font-medium">Entrepreneur</div>
+        </div>
+
+        <div className="flex items-center space-x-4 p-4 bg-purple-50 rounded-lg">
+          <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+            <Star className="w-6 h-6 text-white" />
+          </div>
+          <div className="flex-1">
+            <div className="font-semibold text-gray-900">Sneha switched from Audit to Finance</div>
+            <div className="text-sm text-gray-600">Joined a top fintech company as Finance Analyst</div>
+          </div>
+          <div className="text-sm text-purple-600 font-medium">Career Shift</div>
+        </div>
+      </div>
+
+      <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4">
+        <div className="text-center">
+          <div className="text-2xl font-bold text-gray-900">90%</div>
+          <div className="text-sm text-gray-600">Success Rate</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div className="absolute -top-4 -right-4 w-32 h-32 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full opacity-20 blur-xl"></div>
+  <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full opacity-20 blur-xl"></div>
+</div>
+
         </div>
       </div>
     </section>
